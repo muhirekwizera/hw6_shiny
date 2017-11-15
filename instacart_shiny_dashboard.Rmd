@@ -1,0 +1,104 @@
+---
+title: "Instacart Shiny Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(plotly)
+library(janitor)
+library(forcats)
+library(shiny)
+
+instacart_data = read_csv("./data/instacart_train_data.csv.zip") %>%
+  clean_names()
+```
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+
+departments = instacart_data %>% distinct(department) %>% pull()
+  
+  # check box
+  checkboxGroupInput("department_choice", label = h3("Department"), choices = departments)
+  
+  # # selectInput widget
+  # selectInput("department_choice", label = h3("Select department"), 
+  #                     choices = departments, selected = "produce")
+  
+  # # radioButtons widget
+  # radioButtons("department_choice", label = h3("Choose departmeent type"),
+  #      choices = departments,
+  #      selected = "produce")
+  #      
+  
+  # -----------------------------------------------------------     
+  #      # max_price = 1000
+  # min_price = airbnb_data %>% distinct(price) %>% min()
+  #   
+  # # sliderInput widget
+  # sliderInput("price_range", label = h3("Choose price range"), min = min_price, 
+  #         max = max_price, value = c(100, 400))
+  # 
+  # room_choice = airbnb_data %>% distinct(room_type) %>% pull()
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Bar chart
+
+```{r}
+instacart_data %>%
+  mutate(department = factor(department)) %>%
+  group_by(department) %>%
+    summarize(num_orders = n()) %>%
+    mutate(department = fct_reorder(department, -num_orders)) %>% 
+    plot_ly(x = ~department, y = ~num_orders, type = "bar", color = ~department) %>%
+    layout(margin = list(l = 50, r = 10, t = 15, b = 140))
+```
+
+Row {.tabset .tabset-fade}
+-----------------------------------------------------------------------
+
+### Scatter plot
+
+```{r}
+instacart_data_orders = instacart_data %>%
+  group_by(product_name, department) %>%
+  summarize(num_order = n())
+  
+instacart_data_reorders = instacart_data %>%
+  filter(reordered == 1) %>%
+  group_by(product_name) %>%
+  summarize(num_reorder = n())
+  
+instacart_data_order_reorder = left_join(instacart_data_orders, instacart_data_reorders, by = "product_name") %>%
+  replace_na(list(num_reorder = 0))
+
+# Plotly scatter plot
+instacart_data_order_reorder %>% 
+plot_ly(x = ~num_order, y = ~num_reorder, type = "scatter", color = ~department)
+```
+
+### Histogram
+
+```{r}
+renderPlotly({
+instacart_data %>% 
+  filter(department == input$department_choice & order_dow == 6) %>% 
+  plot_ly(x = ~order_hour_of_day, type = "histogram", color = "red") %>% 
+  layout(yaxis = list(title = "count"))
+})
+```
+
