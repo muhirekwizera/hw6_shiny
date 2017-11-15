@@ -30,7 +30,7 @@ Column {.sidebar}
 departments = instacart_data %>% distinct(department) %>% pull()
   
   # # check box
-  # checkboxGroupInput("department_choice", label = h3("Department"), choices = departments)
+  checkboxGroupInput("department_scatter", label = h3("Department"), choices = departments)
   
   # selectInput widget
   selectInput("department_choice", label = h3("Select department"),
@@ -74,21 +74,24 @@ Row {.tabset .tabset-fade}
 ### Scatter plot
 
 ```{r}
-instacart_data_orders = instacart_data %>%
+
+instacart_data_order = instacart_data %>%
   group_by(product_name, department) %>%
   summarize(num_order = n())
   
-instacart_data_reorders = instacart_data %>%
+instacart_data_reorder = instacart_data %>%
   filter(reordered == 1) %>%
   group_by(product_name) %>%
   summarize(num_reorder = n())
   
-instacart_data_order_reorder = left_join(instacart_data_orders, instacart_data_reorders, by = "product_name") %>%
+instacart_data_order_reorder = left_join(instacart_data_order, instacart_data_reorder, by = "product_name") %>%
   replace_na(list(num_reorder = 0))
 
 # Plotly scatter plot
-instacart_data_order_reorder %>% 
-plot_ly(x = ~num_order, y = ~num_reorder, type = "scatter", color = ~department)
+renderPlotly(
+  instacart_data_order_reorder %>% 
+  filter(department == c(input$department_scatter)) %>%
+plot_ly(x = ~num_order, y = ~num_reorder, type = "scatter", color = ~department))
 ```
 
 ### Histogram
