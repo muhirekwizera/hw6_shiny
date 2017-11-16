@@ -17,6 +17,8 @@ library(plotly)
 library(janitor)
 library(forcats)
 library(shiny)
+library(rsconnect)
+
 
 instacart_data = read_csv("./data/instacart_train_data.csv.zip") %>%
   clean_names()
@@ -30,7 +32,7 @@ Column {.sidebar}
 departments = instacart_data %>% distinct(department) %>% pull()
   
   # # check box
-  checkboxGroupInput("department_scatter", label = h3("Department"), choices = departments)
+  checkboxGroupInput("department_scatter", label = h3("Department"), choices = departments, selected = "produce")
   
   # selectInput widget
   selectInput("department_choice", label = h3("Select department"),
@@ -90,8 +92,10 @@ instacart_data_order_reorder = left_join(instacart_data_order, instacart_data_re
 # Plotly scatter plot
 renderPlotly(
   instacart_data_order_reorder %>% 
-  filter(department == c(input$department_scatter)) %>%
-plot_ly(x = ~num_order, y = ~num_reorder, type = "scatter", color = ~department))
+  filter(department %in% c(input$department_scatter)) %>%
+plot_ly(x = ~num_order, y = ~num_reorder, type = "scatter", color = ~department, alpha = .5))
+#%>%
+ # add_markers(alpha = .5))
 ```
 
 ### Histogram
