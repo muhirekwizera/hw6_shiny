@@ -3,7 +3,7 @@ title: "Instacart Shiny Dashboard"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
-    runtime: shiny
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -31,28 +31,12 @@ Column {.sidebar}
 
 departments = instacart_data %>% distinct(department) %>% pull()
   
-  # # check box
+  # check box
   checkboxGroupInput("department_scatter", label = h3("Department"), choices = departments, selected = "produce")
   
   # selectInput widget
-  selectInput("department_choice", label = h3("Select department"),
+  selectInput("department_choice", label = h3("Department"),
                       choices = departments, selected = "produce")
-  
-  # # radioButtons widget
-  # radioButtons("department_choice", label = h3("Choose departmeent type"),
-  #      choices = departments,
-  #      selected = "produce")
-  #      
-  
-  # -----------------------------------------------------------     
-  #      # max_price = 1000
-  # min_price = airbnb_data %>% distinct(price) %>% min()
-  #   
-  # # sliderInput widget
-  # sliderInput("price_range", label = h3("Choose price range"), min = min_price, 
-  #         max = max_price, value = c(100, 400))
-  # 
-  # room_choice = airbnb_data %>% distinct(room_type) %>% pull()
 ```
 
 Row
@@ -94,8 +78,6 @@ renderPlotly(
   instacart_data_order_reorder %>% 
   filter(department %in% c(input$department_scatter)) %>%
 plot_ly(x = ~num_order, y = ~num_reorder, type = "scatter", color = ~department, alpha = .5))
-#%>%
- # add_markers(alpha = .5))
 ```
 
 ### Histogram
@@ -103,9 +85,8 @@ plot_ly(x = ~num_order, y = ~num_reorder, type = "scatter", color = ~department,
 ```{r}
 renderPlotly({
 instacart_data %>% 
-  filter(department == input$department_choice & order_dow == 6) %>% 
+  filter(department == input$department_choice) %>% 
   plot_ly(x = ~order_hour_of_day, type = "histogram", color = "red") %>% 
   layout(yaxis = list(title = "count"))
 })
 ```
-
