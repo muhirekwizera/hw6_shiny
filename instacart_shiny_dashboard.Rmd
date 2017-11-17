@@ -32,10 +32,10 @@ Column {.sidebar}
 departments = instacart_data %>% distinct(department) %>% pull()
   
   # check box
-  checkboxGroupInput("department_scatter", label = h3("Department"), choices = departments, selected = "produce")
+  checkboxGroupInput("department_scatter", label = h3("Department (scatter plot)"), choices = departments, selected = "produce")
   
   # selectInput widget
-  selectInput("department_choice", label = h3("Department"),
+  selectInput("department_choice", label = h3("Department (histogram)"),
                       choices = departments, selected = "produce")
 ```
 
